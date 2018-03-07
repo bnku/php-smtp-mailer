@@ -28,7 +28,7 @@ if($_POST)
     // $user_Text       = filter_var($_POST["userText"], FILTER_SANITIZE_STRING);
     $subject        = filter_var($_POST["userSubject"], FILTER_SANITIZE_STRING);
 
-    $sentMail = smtpmail('Запрос звонка', 
+    $sentMail = smtpmail($config['smtp_from'], 
                 $to_Email, 
                 $subject, 
                 "Имя: ". $user_Name 
