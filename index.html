@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Запрос звонка с сайта</title>
+    <style>
+    body{
+        background: #999;
+        text-align: center;
+    }
+    .spinner{
+        display: none;
+    }
+    input{
+        width: 300px;
+        line-height: 40px;
+        text-align: center;
+    }
+    button{
+        margin-top: 30px;
+        width: 300px;
+        height: 50px;
+    }
+    </style>
+</head>
+<body>
+
+    <section class="order">
+        <div class="form">
+            <h2>Свяжитесь с нами!</h2>
+            <div class="inputs">
+                <input type="text" name="name" placeholder="Как вас зовут?">
+                <input type="text" name="phone" placeholder="Ваш телефон?">
+            </div>
+            <div class="button">
+                <button>Хочу!</button>
+                <img src="./spinner-w.svg" alt="" class="spinner">
+            </div>
+        </div>
+        <div class="order-result"></div>
+    </section>
+
+    <script>
+    document.querySelector('.order button').onclick = function () {
+        callMe(this);
+        return false;
+    };
+
+    function postAjax(url, data, callback) {
+    var oXmlHttp = new XMLHttpRequest();
+    oXmlHttp.open("POST", url, true);
+    oXmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    oXmlHttp.onreadystatechange = function() {
+        if (oXmlHttp.readyState == 4) {
+            // console.log(oXmlHttp);
+            if (oXmlHttp.status == 200) {
+                callback(oXmlHttp.responseText);
+            } else {
+                callback('error' + oXmlHttp.statusText);
+            }
+        }
+    };
+    oXmlHttp.send(data);
+    }
+
+    function callMe(el) {
+    //get input field values
+        var name = name = el.parentNode.parentNode.querySelector('.inputs').querySelector('input[name=name]');
+        var user_name = name.value;
+        var phone = el.parentNode.parentNode.querySelector('.inputs').querySelector('input[name=phone]');
+        var user_phone = phone.value;
+        var subject = 'Запрос звонка с сайта';
+        
+    el.parentNode.querySelector('.spinner').style.display = "inline-block";
+
+    //simple validation at client's end
+    //we simply change border color to red if empty field using .css()
+    var proceed = true;  
+    if (user_name) user_name = user_name;
+    if (user_phone) user_phone = user_phone;
+
+    //everything looks good! proceed...
+    if (proceed) {
+        //data to be sent to server
+        post_data = 'userName='+user_name+'&userPhone='+user_phone+'&userSubject='+subject;
+
+        //Ajax post data to server
+        postAjax('contact_me.php', post_data, function (resp) {
+
+        console.log(resp);
+        var response = JSON.parse(resp);
+        //load json data from server and output message
+        if (response.type == 'error') {
+            output = '<div class="error">' + response.text + '</div>';
+        } else {
+            output = '<div class="success">' + response.text + '</div>';
+            //reset values in all input fields
+            name.value = '';
+            phone.value = '';
+        }
+        
+        document.querySelector('.order-result').innerHTML = output;
+        el.parentNode.querySelector('.spinner').style.display = "none";
+        });
+    }
+    name.style.border = 'none';
+    phone.style.border = 'none';
+    };
+    </script>
+
+</body>
+</html>
